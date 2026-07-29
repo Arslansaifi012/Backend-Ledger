@@ -39,4 +39,30 @@ function fntoken(id) {
 } ;
 
 
-export {userRegistrationController}
+async function userLogin(req, res) {
+
+    const {email, password} = req.body ;
+
+    const user = await userModel.findOne({email:email}).select("+password") ;    
+
+    if (!user) {
+        return res.status(404).json({message:'user not found this email', success:false})
+    } ;
+
+    const isValidPassword = await user.comparePassword(password)
+
+    if (!isValidPassword) {
+        return res.status(401).json({message:"Invalid Credentials..", success:false})
+    }
+
+    const token = fntoken(user._id) ;
+
+    res.cookie("token", token)
+
+    res.status(200).json({user, token, message:'user successfully login', success:true}) ;
+
+    
+}
+
+
+export {userRegistrationController, userLogin}

@@ -2,8 +2,6 @@
 import mongoose from "mongoose";
 
 function connectToDB() {
-    console.log(process.env.MONGODB_URI,'checking chal rahi h');
-    
 
     mongoose.connect(process.env.MONGODB_URI)
     .then(()=>{
