@@ -1,7 +1,6 @@
 import nodemailer from "nodemailer" ;
 
-
- const sendEmails = (email) =>{
+ const sendEmails =async(to) =>{
 
     const transporter = nodemailer.createTransport({
    host:'smtp.gmail.com',
@@ -25,15 +24,15 @@ try {
 
 
 try {
-    const info =  transporter.sendMail({
+    const info = await transporter.sendMail({
         from:process.env.SMTP_USER,
-        to:email,
+        to,
         subject:"Email System Check",
         text:"Hii Email Sender Is Working....",
-        html:"<h1>Email System./h1>"
-    }, (error, info));
+        html:"<h1>Email System.</h1>"
+    },);
 
-    console.log("message sent ",info.messageId) ;
+    console.log("message sent ",info) ;
 
     
 } catch (error) {
