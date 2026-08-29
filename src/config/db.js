@@ -2,7 +2,7 @@
 import mongoose from "mongoose";
 
 function connectToDB() {
-
+    
     mongoose.connect(process.env.MONGODB_URI)
     .then(()=>{
         console.log("DB Connected To Successfully")
@@ -14,3 +14,7 @@ function connectToDB() {
 } ;
 
 export default connectToDB ;
+
+
+
+
