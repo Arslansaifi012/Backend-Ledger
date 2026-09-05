@@ -64,7 +64,7 @@ async function userLogin(req, res) {
 
     res.status(200).json({user, token, message:'user successfully login', success:true}) ;
 
-    
+
 }
 
 
