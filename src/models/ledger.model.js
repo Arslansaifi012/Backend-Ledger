@@ -2,7 +2,7 @@
 
 import mongoose from "mongoose";
 
-const ledgerMongoose = new mongoose.Schema({
+const ledgerSchema = new mongoose.Schema({
 
     account:{
         type: mongoose.Schema.Types.ObjectId,
@@ -39,4 +39,18 @@ const ledgerMongoose = new mongoose.Schema({
 
     }
      
-})
+}) ;
+
+    function preventLedgerModification() {
+        throw new Error("Ledger entries are immutable and cannot be modified or deleted")
+    } ;
+
+    ledgerSchema.pre('findOneAndUpdate', preventLedgerModification);
+    ledgerSchema.pre('updateOne', preventLedgerModification);
+    ledgerSchema.pre('deleteOne', preventLedgerModification);
+    ledgerSchema.pre('remove', preventLedgerModification);
+    ledgerSchema.pre('deleteMany', preventLedgerModification);
+
+    const ledgerModel = mongoose.models.ledger || mongoose.model('ledger', ledgerSchema);
+
+    export default ledgerModel ;
