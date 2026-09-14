@@ -1,7 +1,7 @@
 
 import userModel from "../models/user.model.js"; 
 import jwt from "jsonwebtoken" ;
-import sendEmails from "../services/email.sevice.js";
+import { sendEmails } from "../services/email.sevice.js";
 
 function fntoken(id) {
      return jwt.sign({id}, process.env.JWT_SECRET, {expiresIn:"3d"})

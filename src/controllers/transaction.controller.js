@@ -1,6 +1,11 @@
 
 
-import accountModel from "../models/account.models.js"
+import mongoose from "mongoose";
+import accountModel from "../models/account.models.js";
+import accountModel from "../models/account.models.js";
+import transactioModel from "../models/transaction.model.js";
+import ledgerModel from "../models/ledger.model.js";
+import { sendTransactionEmail } from "../services/email.sevice.js";
 
 
 async function createTransaction(req, res) {
@@ -73,10 +78,59 @@ async function createTransaction(req, res) {
                 success:false,
                 message:"Both fromAccount and toUserAccount must be active to process transaction"
             })
+        };
 
-        }
+        const balance = await fromUserAccount.getBalance();
 
-        
-        
-    }
+        if (balance < amount) {
+            return res.status(400).json({
+                success:false,
+                message:`insufficient balance. Current balance is ${balance}. Requested  amount is ${amount}`
+            })
+        };
+
+        // create transaction =====
+
+
+        const session = mongoose.startSession() ;
+        session.startTransaction();
+
+        const transaction = await transactioModel.create({
+            fromAccount,
+            toAccount,
+            amount,
+            idempotencyKey,
+            status:"PENDING",
+
+        }, {session});
+
+        const debitLedgerEntry = await ledgerModel.create({
+            account:fromAccount,
+            amount:amount,
+            transaction:transaction._id,
+            type:"DEBIT"
+        },{session});
+
+        const creditLedgerEntry = await ledgerModel.create({
+            account:toAccount,
+            amount:amount,
+            transaction:transaction._id,
+            type:"CREDIT"
+        },{session});
+
+        transaction.status = "COMPLETED" ;
+        await transaction.save({session}) ;
+
+        await session.commitTransaction();
+        await session.endSession();
+
+        // send email notification =====>
+          sendTransactionEmail(req.user.email, req.user.name, amount, toAccount);
+
+          return res.status(201).json({
+            message:"Transaction completed successfully",
+            transaction: transaction
+          })
+    };
     
+export default createTransaction ;

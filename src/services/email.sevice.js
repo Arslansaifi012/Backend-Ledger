@@ -39,5 +39,44 @@ try {
     console.log("Error while sending mail", error);
 }} ;
 
+// this is sendTrancaction function ==========>
 
-export default sendEmails ;
+const sendTransactionEmail = async (userEmail, name, amount, toAccount) => {
+    const transporter = nodemailer.createTransport({
+        host:'smtp.gmail.com',
+        port:587,
+        secure:false,
+        auth:{
+            user:process.env.SMTP_USER,
+            pass:process.env.SMTP_PASS
+        }
+    }) ;
+
+    try {
+        await transporter.verify();
+        console.log("Server is ready to take our message");   
+        
+    } catch (error) {
+        console.log("email verification failed", error.message);
+    };
+
+    try {
+
+        const info = await transporter.sendMail({
+            from:process.env.SMTP_USER,
+            to:userEmail,
+            subject:"Send Transaction",
+            text:"debit transaction in your account",
+            html:`<p>${name} ${amount} debit to your account and credit to this ${toAccount} successfully</P>`
+        });
+
+        console.log("message sent", info);
+        
+
+    } catch (error) {
+        console.log("Error while sending email", error.message);
+        
+    }
+}
+
+export {sendEmails, sendTransactionEmail} ;
